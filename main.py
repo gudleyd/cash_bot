@@ -1,3 +1,6 @@
+#https://vk.com/mynumberis21
+#Not for commercial use
+
 import telebot
 import sqlite3
 import time
@@ -122,9 +125,9 @@ def receive_lan(id):
     cur.execute("SELECT Language FROM Users WHERE id = ?", (str(id),))
     con.commit()
     a = cur.fetchone()
-    return str(a[0])
     cur.close()
     con.close()
+    return str(a[0])
 
 create_main_table()
 
