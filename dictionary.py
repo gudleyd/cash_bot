@@ -30,8 +30,12 @@ lan['English'] = {'bar_error': 'The purchase need to be entered like <Bargain Pr
                   'm_total': 'Total',
                   'm_price': 'Price',
                   'm_name': 'Name',
-                  'm_excelTimer': 'You have recently created a table by {}, wait {} hours {} minutes {} seconds'
+                  'm_excelTimer': 'You have recently created a table by {}, wait {} hours {} minutes {} seconds',
+                  'm_back': 'Back',
+                  'm_emptyHistory': 'Your history is empty!',
+                  'm_help': 'Заглушка'
                   }
+
 lan['Русский'] = {'bar_error': 'Покупку надо вводить по примеру <Покупка Цена>',
                   'b_his': u'\U0001F4D3',
                   'b_set': u'\U0001F527',
@@ -57,4 +61,8 @@ lan['Русский'] = {'bar_error': 'Покупку надо вводить п
                   'm_total': 'Итого',
                   'm_price': 'Цена',
                   'm_name': 'Название',
-                  'm_excelTimer': 'Вы уже недавно создавали отчет {}, подождите {} часов {} минут {} секунд'}
+                  'm_excelTimer': 'Вы уже недавно создавали отчет {}, подождите {} часов {} минут {} секунд',
+                  'm_back': 'Назад',
+                  'm_emptyHistory': 'Ваша история пуста!',
+                  'm_help': 'Чтобы добавить трату, напишите <Покупка Цена>\n(Например: Шоколадка 100)\nЧтобы добавить прибыль, напишите <Источник +Сумма>\n'
+                            '(Например: Зарплата +100000)'}

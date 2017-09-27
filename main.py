@@ -64,6 +64,13 @@ timers = {'one_month': 5 * 60,
 def excelCreating(id, by):
     nowTime = time.time()
     lan = read_lan(id)
+    con = sqlite3.connect('bar.db')
+    cur = con.cursor()
+    cur.execute("SELECT Bargain, Value, Date FROM '" + str(id) + "'")
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        bot.send_message(id, dictionary.lan[lan]['m_emptyHistory'])
+        return
     if last_excels.get(id) == None:
         last_excels[id] = {}
         for name in timers.keys():
@@ -81,18 +88,14 @@ def excelCreating(id, by):
     heap = workbook.add_worksheet(dictionary.lan[lan]['m_heap'])
     min = []
     plus = []
-    con = sqlite3.connect('bar.db')
-    cur = con.cursor()
-    cur.execute("SELECT Bargain, Value, Date FROM '" + str(id) + "'")
-    rows = cur.fetchall()
     if by == 'one_month':
         fm = rows[len(rows) - 1][2][5:7]
         sm = fm
         heap.write(0, 0, dictionary.lan[lan]['m_name'])
         heap.write(0, 1, dictionary.lan[lan]['m_price'])
-        i, j = 1, 1
+        i, j = 0, 1
         sum = 0
-        while sm == fm:
+        while i < len(rows) and sm == fm:
             if int(rows[len(rows) - 1 - i][1]) > 0:
                 plus.append((rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][1],  rows[len(rows) - 1 - i][2]))
             else:
@@ -100,19 +103,19 @@ def excelCreating(id, by):
             heap.write(i, j - 1, rows[len(rows) - 1 - i][0])
             heap.write(i, j, rows[len(rows) - 1 - i][1])
             heap.write(i, j + 1, rows[len(rows) - 1 - i][2])
-            i += 1
             sum += int(rows[len(rows) - 1 - i][1])
             if len(rows) - 1 - i < 0:
                 break
             sm = rows[len(rows) - 1 - i][2][5:7]
+            i += 1
         heap.write(i + 1, 0, dictionary.lan[lan]['m_total'])
         heap.write(i + 1, 1, sum)
     elif by == 'all_time':
         heap.write(0, 0, dictionary.lan[lan]['m_name'])
         heap.write(0, 1, dictionary.lan[lan]['m_price'])
-        i, j = 1, 1
+        i, j = 0, 1
         sum = 0
-        while True:
+        while i < len(rows):
             if int(rows[len(rows) - 1 - i][1]) > 0:
                 plus.append((rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][2]))
             else:
@@ -120,20 +123,21 @@ def excelCreating(id, by):
             heap.write(i, j - 1, rows[len(rows) - 1 - i][0])
             heap.write(i, j, rows[len(rows) - 1 - i][1])
             heap.write(i, j + 1, rows[len(rows) - 1 - i][2])
-            i += 1
             sum += int(rows[len(rows) - 1 - i][1])
             if len(rows) - 1 - i < 0:
                 break
+            i += 1
         heap.write(i + 1, 0, dictionary.lan[lan]['m_total'])
         heap.write(i + 1, 1, sum)
     elif by == 'year':
         fy = rows[len(rows) - 1][2][:4]
+        print(fy)
         sy = fy
         heap.write(0, 0, dictionary.lan[lan]['m_name'])
         heap.write(0, 1, dictionary.lan[lan]['m_price'])
-        i, j = 1, 1
+        i, j = 0, 1
         sum = 0
-        while sy == fy:
+        while i < len(rows) and sy == fy:
             if int(rows[len(rows) - 1 - i][1]) > 0:
                 plus.append((rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][2]))
             else:
@@ -141,44 +145,47 @@ def excelCreating(id, by):
             heap.write(i, j - 1, rows[len(rows) - 1 - i][0])
             heap.write(i, j, rows[len(rows) - 1 - i][1])
             heap.write(i, j + 1, rows[len(rows) - 1 - i][2])
-            i += 1
             sum += int(rows[len(rows) - 1 - i][1])
             if len(rows) - 1 - i < 0:
                 break
-            sy = rows[len(rows) - 1 - i][2][5:7]
+            sy = rows[len(rows) - 1 - i][2][:4]
+            print(sy)
+            i += 1
         heap.write(i + 1, 0, dictionary.lan[lan]['m_total'])
         heap.write(i + 1, 1, sum)
     elif by == 'three_months':
-        fm = rows[len(rows) - 1][2][5:7]
-        sm = fm
-        s = 0
-        if int(fm) == 1:
-            s = 10
-        elif int(fm) == 2:
-            s = 11
-        elif int(fm) == 3:
-            s = 12
-        else:
-            s = int(fm) - 2
-        heap.write(0, 0, dictionary.lan[lan]['m_name'])
-        heap.write(0, 1, dictionary.lan[lan]['m_price'])
-        i, j = 1, 1
-        sum = 0
-        while sm != s:
-            if int(rows[len(rows) - 1 - i][1]) > 0:
-                plus.append((rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][2]))
-            else:
-                min.append((rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][2]))
-            heap.write(i, j - 1, rows[len(rows) - 1 - i][0])
-            heap.write(i, j, rows[len(rows) - 1 - i][1])
-            heap.write(i, j + 1, rows[len(rows) - 1 - i][2])
-            i += 1
-            sum += int(rows[len(rows) - 1 - i][1])
-            if len(rows) - 1 - i < 0:
-                break
-            sm = rows[len(rows) - 1 - i][2][5:7]
-        heap.write(i + 1, 0, dictionary.lan[lan]['m_total'])
-        heap.write(i + 1, 1, sum)
+        # fm = rows[len(rows) - 1][2][5:7]
+        # sm = fm
+        # s = 0
+        # if int(fm) == 1:
+        #     s = 10
+        # elif int(fm) == 2:
+        #     s = 11
+        # elif int(fm) == 3:
+        #     s = 12
+        # else:
+        #     s = int(fm) - 2
+        # heap.write(0, 0, dictionary.lan[lan]['m_name'])
+        # heap.write(0, 1, dictionary.lan[lan]['m_price'])
+        # i, j = 1, 1
+        # sum = 0
+        # while sm != s:
+        #     if int(rows[len(rows) - 1 - i][1]) > 0:
+        #         plus.append((rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][2]))
+        #     else:
+        #         min.append((rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][1], rows[len(rows) - 1 - i][2]))
+        #     heap.write(i, j - 1, rows[len(rows) - 1 - i][0])
+        #     heap.write(i, j, rows[len(rows) - 1 - i][1])
+        #     heap.write(i, j + 1, rows[len(rows) - 1 - i][2])
+        #     i += 1
+        #     sum += int(rows[len(rows) - 1 - i][1])
+        #     if len(rows) - 1 - i < 0:
+        #         break
+        #     sm = rows[len(rows) - 1 - i][2][5:7]
+        # heap.write(i + 1, 0, dictionary.lan[lan]['m_total'])
+        # heap.write(i + 1, 1, sum)
+        bot.send_message(id, 'Заглушка')
+        return
     pm = workbook.add_worksheet('+-')
     pm.write(0, 0, dictionary.lan[lan]['m_name'])
     pm.write(0, 1, dictionary.lan[lan]['m_price'])
@@ -229,7 +236,7 @@ def new_bargain(id, message_text):
             bar_error(id)
         else:
             cash = float(a[len(a) - 1])
-            if len(a[len(a) - 1]) > 20:
+            if len(a[len(a) - 1]) > 12:
                 bot.send_message(id, dictionary.lan[read_lan(id)]['m_bigNumber'])
             else:
                 if a[len(a) - 1][0] == "+":
@@ -262,7 +269,8 @@ def list_print(id):
     cur = con.cursor()
     cur.execute("SELECT Money FROM Users WHERE id = ?", (str(id),))
     a = cur.fetchone()
-    ans = dictionary.lan[lan]['m_lastBars'] + '\n' + dictionary.lan[read_lan(id)]['m_mon'] + str(a[0]) + u'\U0001F4B5' + "\n"
+    mainText = dictionary.lan[read_lan(id)]['m_mon'] + str(a[0]) + u'\U0001F4B5' + '\n\n' + dictionary.lan[lan]['m_lastBars'] + "\n"
+    ans = ""
     con.commit()
     con = sqlite3.connect('bar.db')
     with con:
@@ -275,7 +283,8 @@ def list_print(id):
                 sign = "+"
             else:
                 sign = ""
-            ans += row[0] + " | " + sign + str(row[1]) + u'\U0001F4B5' + "\n"
+            ans = row[0] + "\t" + sign + str(row[1]) + u'\U0001F4B5' + "\n" + ans
+        ans = mainText + ans
         bot.send_message(id, ans, reply_markup=keyboards.default_markup)
     cur.close()
     con.close()
@@ -328,6 +337,19 @@ def read_lan(id):
 
 create_main_table()
 
+
+@bot.message_handler(commands=['help'])
+def handle_message(message):
+    lan = read_lan(message.from_user.id)
+    bot.send_message(message.from_user.id, dictionary.lan[lan]['m_help'])
+
+
+@bot.message_handler(commands=['contact'])
+def handle_message(message):
+    lan = read_lan(message.from_user.id)
+    bot.send_message(message.from_user.id, '@van4es0909')
+
+
 @bot.message_handler(commands=['start'])
 def handle_message(message):
     con = sqlite3.connect('bar.db')
@@ -370,22 +392,25 @@ def handle_message(message):
 
 @bot.message_handler(content_types=['text'])
 def handle_message(message):
-    chat_id = message.chat.id
-    if message.text == 'Excel':
-        lan = read_lan(chat_id)
+    chat_id = message.from_user.id
+    curMesText = message.text
+    lan = read_lan(chat_id)
+    if curMesText  == u'\U0001F519':
+        bot.send_message(chat_id, dictionary.lan[lan]['m_back'], reply_markup=keyboards.default_markup)
+    elif curMesText == 'Excel':
         mesText = dictionary.lan[lan]['m_ExcelChoose'].format('/ex_1_month', '/ex_3_months', '/ex_year', '/ex_time')
         bot.send_message(chat_id, mesText)
-    elif message.text == dictionary.lan[read_lan(chat_id)]['b_his']: #История
+    elif curMesText == dictionary.lan[lan]['b_his']: #История
         list_print(message.from_user.id)
-    elif message.text == dictionary.lan[read_lan(chat_id)]['b_set']: #Настройки
+    elif curMesText == dictionary.lan[lan]['b_set']: #Настройки
         bot.send_message(chat_id, message.text, reply_markup=keyboards.settings_markup)
-    elif message.text == dictionary.lan[read_lan(chat_id)]['b_del_his']: #Удалить историю
+    elif curMesText == dictionary.lan[lan]['b_del_his']: #Удалить историю
         update_money(chat_id, 0)
         del_hist(chat_id)
-        bot.send_message(message.from_user.id, dictionary.lan[read_lan(chat_id)]['m_del_his'], reply_markup=keyboards.default_markup)
-    elif message.text == 'English':
+        bot.send_message(message.from_user.id, dictionary.lan[lan]['m_del_his'], reply_markup=keyboards.default_markup)
+    elif curMesText == 'English':
         change_lan(chat_id, 'English')
-    elif message.text == 'Русский':
+    elif curMesText == 'Русский':
         change_lan(chat_id, 'Русский')
     else:
         new_bargain(message.from_user.id, message.text)

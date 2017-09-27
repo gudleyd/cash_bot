@@ -10,3 +10,4 @@ default_markup.row(u'\U0001F527')
 
 settings_markup = telebot.types.ReplyKeyboardMarkup(True)
 settings_markup.row(u'\U0001F5D1')
+settings_markup.row(u'\U0001F519')
